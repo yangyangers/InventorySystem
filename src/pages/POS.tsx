@@ -630,34 +630,141 @@ export default function POS() {
       </div>
 
 
-      {checkoutSuccess && customer && (
-        <Modal
-          title="Purchase Complete!"
-          subtitle="The sale has been recorded successfully."
-          onClose={() => setCheckoutSuccess(false)}
-          width={400}
-          icon={<ShoppingCart size={18} />}
-          iconBg="var(--c-teal-dim)"
-          iconColor="var(--teal)"
-          footer={
-            <>
-              <button className="btn btn-secondary" onClick={() => setCheckoutSuccess(false)}>Close</button>
-              <button className="btn btn-primary" onClick={() => { setCheckoutSuccess(false); printReceipt() }}>
-                <Printer size={15} /> Print Receipt
-              </button>
-            </>
-          }
-        >
-          <div style={{ textAlign: 'center', padding: '16px 0' }}>
-            <div style={{ fontSize: 48, marginBottom: 10 }}>🎉</div>
-            <p style={{ fontWeight: 800, fontSize: 16, color: 'var(--ink)', marginBottom: 6 }}>All set!</p>
-            <p style={{ color: 'var(--c-text2)', fontSize: 13.5 }}>
-              Sale recorded for <b>{customer.name}</b>.<br />
-              Total: <b>{money(totalDue)}</b>
-            </p>
-          </div>
-        </Modal>
-      )}
+      {checkoutSuccess && customer && (() => {
+        const safeDiscount  = Math.max(0, Number(discount) || 0)
+        const safeTotal     = Math.max(0, subTotal - safeDiscount)
+        const safePaid      = amountPaid !== '' ? Math.max(0, Number(amountPaid) || 0) : safeTotal
+        const safeChange    = Math.max(0, safePaid - safeTotal)
+        const outstanding   = Math.max(0, safeTotal - safePaid)
+        const pmLabel       = paymentMethod ? PAYMENT_METHOD_LABEL[paymentMethod as PaymentMethod] : ''
+        const slLabel       = stockLocation ? STOCK_LOCATION_LABEL[stockLocation as StockLocation] : ''
+        const cashier       = user ? (user.full_name || user.username) : ''
+        const storeName     = biz?.name || 'Store'
+
+        return (
+          <Modal
+            title="Purchase Complete!"
+            subtitle="The sale has been recorded successfully."
+            onClose={() => setCheckoutSuccess(false)}
+            width={480}
+            icon={<ShoppingCart size={18} />}
+            iconBg="var(--c-teal-dim)"
+            iconColor="var(--teal)"
+            footer={
+              <>
+                <button className="btn btn-secondary" onClick={() => setCheckoutSuccess(false)}>Close</button>
+                <button className="btn btn-primary" onClick={() => { setCheckoutSuccess(false); printReceipt() }}>
+                  <Printer size={15} /> Print Receipt
+                </button>
+              </>
+            }
+          >
+            {/* ── Receipt Preview ─────────────────────────────────── */}
+            <div style={{
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace',
+              fontSize: 12.5,
+              background: '#fff',
+              color: '#111',
+              border: '1px dashed #ccc',
+              borderRadius: 10,
+              padding: '18px 20px',
+              maxHeight: 420,
+              overflowY: 'auto',
+              marginBottom: 16,
+              boxShadow: '0 2px 12px rgba(0,0,0,.06)',
+            }}>
+              {/* Header */}
+              <div style={{ textAlign: 'center', marginBottom: 10 }}>
+                {logoSrc && (
+                  <img src={logoSrc} style={{ maxWidth: 120, maxHeight: 40, objectFit: 'contain', display: 'block', margin: '0 auto 6px' }} />
+                )}
+                <div style={{ fontWeight: 800, fontSize: 14 }}>{storeName}</div>
+                <div style={{ opacity: .6, fontSize: 11 }}>POS Receipt</div>
+              </div>
+
+              {/* Divider */}
+              <div style={{ borderTop: '1px dashed #bbb', margin: '8px 0' }} />
+
+              {/* Meta */}
+              <div style={{ fontSize: 11.5, lineHeight: 1.7 }}>
+                <div><span style={{ opacity: .6 }}>Ref #: </span><b>{voucher}</b></div>
+                <div><span style={{ opacity: .6 }}>Date: </span>{new Date(dateOfSale).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                <div><span style={{ opacity: .6 }}>Customer: </span>{customer.name}</div>
+                {customer.phone && <div><span style={{ opacity: .6 }}>Phone: </span>{customer.phone}</div>}
+                <div><span style={{ opacity: .6 }}>Cashier: </span>{cashier}</div>
+                {slLabel && <div><span style={{ opacity: .6 }}>Location: </span>{slLabel}</div>}
+              </div>
+
+              {/* Divider */}
+              <div style={{ borderTop: '1px dashed #bbb', margin: '8px 0' }} />
+
+              {/* Line items */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <tbody>
+                  {cart.map(r => (
+                    <tr key={r.product_id}>
+                      <td style={{ paddingBottom: 6, verticalAlign: 'top' }}>
+                        <div style={{ fontWeight: 700 }}>{r.name}</div>
+                        <div style={{ opacity: .6, fontSize: 11 }}>{r.qty} {r.unit} × {money(r.selling_price)}</div>
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, verticalAlign: 'top', paddingBottom: 6 }}>
+                        {money(r.qty * (r.selling_price || 0))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Divider */}
+              <div style={{ borderTop: '1px dashed #bbb', margin: '8px 0' }} />
+
+              {/* Totals */}
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <tbody>
+                  <tr>
+                    <td style={{ opacity: .6, paddingBottom: 3 }}>Subtotal</td>
+                    <td style={{ textAlign: 'right', paddingBottom: 3 }}>{money(subTotal)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ opacity: .6, paddingBottom: 3 }}>Discount</td>
+                    <td style={{ textAlign: 'right', paddingBottom: 3 }}>-{money(safeDiscount)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 800, paddingBottom: 3 }}>Total</td>
+                    <td style={{ textAlign: 'right', fontWeight: 800, paddingBottom: 3 }}>{money(safeTotal)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ opacity: .6, paddingBottom: 3 }}>Amount Paid</td>
+                    <td style={{ textAlign: 'right', paddingBottom: 3 }}>{money(safePaid)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ opacity: .6, paddingBottom: 3 }}>Change</td>
+                    <td style={{ textAlign: 'right', paddingBottom: 3 }}>{money(safeChange)}</td>
+                  </tr>
+                  {pmLabel && (
+                    <tr>
+                      <td style={{ opacity: .6, paddingBottom: 3 }}>Method</td>
+                      <td style={{ textAlign: 'right', paddingBottom: 3 }}>{pmLabel}{paymentReference ? ' · ' + paymentReference : ''}</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Remaining balance */}
+              {outstanding > 0 && (
+                <div style={{ background: '#fef3c7', border: '1px dashed #d97706', borderRadius: 6, padding: '6px 10px', marginTop: 8, fontSize: 11.5 }}>
+                  <b>⚠ Remaining Balance: {money(outstanding)}</b>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div style={{ borderTop: '1px dashed #bbb', margin: '10px 0 4px' }} />
+              <div style={{ textAlign: 'center', opacity: .55, fontSize: 11 }}>Thank you!</div>
+            </div>
+            {/* ── End Receipt Preview ──────────────────────────────── */}
+          </Modal>
+        )
+      })()}
 
     </div>
   )
