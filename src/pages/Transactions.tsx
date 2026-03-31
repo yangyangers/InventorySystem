@@ -84,14 +84,24 @@ export function Transactions() {
 
   const showSaleCols = !type || type === 'stock_out'
   const showExtraCols = showSaleCols
-  const colSpan = showSaleCols ? 12 : 8
+  const colSpan = showSaleCols ? 11 : 8
 
   function money(n: number) {
     return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(n)
   }
 
+
+  const tableCSS = `
+    @media (max-width: 900px) {
+      .tx-col-hide-md { display: none !important; }
+    }
+    @media (max-width: 640px) {
+      .tx-col-hide-sm { display: none !important; }
+    }
+  `
   return (
     <div className="anim-fade-up">
+      <style>{tableCSS}</style>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-.02em' }}>Transactions</h2>
@@ -116,21 +126,21 @@ export function Transactions() {
 
       <div className="card" style={{ overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className="table">
+          <table className="table" style={{ fontSize: 11.5, width: "100%", minWidth: 640 }}>
             <thead>
               <tr>
                 <th>Product</th>
                 <th>Type</th>
                 <th>Qty</th>
-                {showSaleCols && <th style={{ whiteSpace: 'nowrap' }}><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Receipt size={12} />Doc / Ref #</span></th>}
-                {showSaleCols && <th style={{ whiteSpace: 'nowrap' }}><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Calendar size={12} />Date of Sale</span></th>}
-                {showSaleCols && <th style={{ whiteSpace: 'nowrap' }}><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><User size={12} />Customer</span></th>}
-                {showExtraCols && <th style={{ whiteSpace: 'nowrap' }}>Payment</th>}
-                {showExtraCols && <th style={{ whiteSpace: 'nowrap' }}>Location</th>}
-                {showExtraCols && <th style={{ whiteSpace: 'nowrap' }}>Outstanding</th>}
-                <th>By</th>
-                <th>Notes</th>
-                <th>Recorded</th>
+                {showSaleCols && <th><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Receipt size={12} />Ref #</span></th>}
+                {showSaleCols && <th><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Calendar size={12} />Date</span></th>}
+                {showSaleCols && <th><span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><User size={12} />Customer</span></th>}
+                {showExtraCols && <th className="tx-col-hide-md">Payment</th>}
+                {showExtraCols && <th className="tx-col-hide-md">Location</th>}
+                {showExtraCols && <th className="tx-col-hide-md">Outstanding</th>}
+                <th className="tx-col-hide-sm">By</th>
+                
+                <th className="tx-col-hide-sm">Recorded</th>
               </tr>
             </thead>
             <tbody>
@@ -147,23 +157,23 @@ export function Transactions() {
                   return (
                     <tr key={tx.id}>
                       <td>
-                        <p style={{ fontWeight: 600, color: 'var(--ink)', fontSize: 13.5 }}>{tx.products?.name ?? '—'}</p>
-                        <p style={{ fontSize: 11.5, color: 'var(--c-text3)', fontFamily: 'var(--mono)' }}>{tx.products?.sku}</p>
+                        <p style={{ fontWeight: 600, color: 'var(--ink)', fontSize: 12, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.products?.name ?? '—'}</p>
+                        <p style={{ fontSize: 10, color: 'var(--c-text4)', fontFamily: 'var(--mono)' }}>{tx.products?.sku}</p>
                       </td>
                       <td>
                         <span className={`badge ${tx.transaction_type === 'stock_in' ? 'badge-green' : tx.transaction_type === 'stock_out' ? 'badge-red' : 'badge-blue'}`}>
                           {TX_LABEL[tx.transaction_type]}
                         </span>
                       </td>
-                      <td style={{ fontWeight: 700, color: txColor(tx.transaction_type), fontSize: 14 }}>
+                      <td style={{ fontWeight: 700, color: txColor(tx.transaction_type), fontSize: 12 }}>
                         {txSign(tx.transaction_type)}{tx.quantity} {tx.products?.unit}
                       </td>
                       {showSaleCols && (
                         <td>
                           {tx.transaction_type === 'stock_in' && tx.voucher_number
-                            ? <span className="mono badge badge-blue" style={{ fontSize: 11.5 }}>{tx.voucher_number}</span>
+                            ? <span className="mono badge badge-blue" style={{ fontSize: 10.5, padding: '1px 5px' }}>{tx.voucher_number}</span>
                             : tx.transaction_type === 'stock_out' && tx.reference_number
-                            ? <span className="mono badge badge-navy" style={{ fontSize: 11.5 }}>{tx.reference_number}</span>
+                            ? <span className="mono badge badge-navy" style={{ fontSize: 10.5, padding: '1px 5px' }}>{tx.reference_number}</span>
                             : <span style={{ color: 'var(--c-text4)' }}>—</span>}
                         </td>
                       )}
@@ -171,7 +181,7 @@ export function Transactions() {
                         <td style={{ fontSize: 12.5, color: 'var(--c-text2)', whiteSpace: 'nowrap' }}>
                           {isOut
                             ? tx.date_of_sale
-                              ? new Date(tx.date_of_sale).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })
+                              ? new Date(tx.date_of_sale).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })
                               : <span style={{ color: 'var(--c-text4)' }}>—</span>
                             : null}
                         </td>
@@ -181,9 +191,9 @@ export function Transactions() {
                           {isOut
                             ? tx.customer_name
                               ? <div>
-                                  <p style={{ fontWeight: 600, fontSize: 13, color: 'var(--ink)' }}>{tx.customer_name}</p>
+                                  <p style={{ fontWeight: 600, fontSize: 11.5, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100 }}>{tx.customer_name}</p>
                                   {tx.customer_phone && (
-                                    <p style={{ fontSize: 11.5, color: 'var(--c-text3)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                                    <p style={{ fontSize: 10, color: 'var(--c-text3)', display: 'flex', alignItems: 'center', gap: 3 }}>
                                       <Phone size={10} />{tx.customer_phone}
                                     </p>
                                   )}
@@ -193,31 +203,31 @@ export function Transactions() {
                         </td>
                       )}
                       {showExtraCols && (
-                        <td>
+                        <td className="tx-col-hide-md">
                           {isOut && tx.payment_method
                             ? <div>
-                                <span style={{ fontSize: 11.5, fontWeight: 700, background: 'var(--c-teal-dim)', color: 'var(--teal)', borderRadius: 5, padding: '2px 7px', display: 'inline-block' }}>
+                                <span style={{ fontSize: 10.5, fontWeight: 700, background: 'var(--c-teal-dim)', color: 'var(--teal)', borderRadius: 4, padding: '1px 5px', display: 'inline-block' }}>
                                   {PAYMENT_METHOD_LABEL[tx.payment_method as PaymentMethod]}
                                 </span>
                                 {tx.payment_reference && (
-                                  <p style={{ fontFamily: 'var(--mono)', fontSize: 10.5, color: 'var(--c-text4)', marginTop: 2 }}>{tx.payment_reference}</p>
+                                  <p style={{ fontFamily: 'var(--mono)', fontSize: 9.5, color: 'var(--c-text4)', marginTop: 1 }}>{tx.payment_reference}</p>
                                 )}
                               </div>
                             : <span style={{ color: 'var(--c-text4)' }}>—</span>}
                         </td>
                       )}
                       {showExtraCols && (
-                        <td style={{ fontSize: 12.5, color: 'var(--c-text2)' }}>
+                        <td className="tx-col-hide-md" style={{ fontSize: 11.5, color: 'var(--c-text2)' }}>
                           {tx.stock_location
                             ? STOCK_LOCATION_LABEL[tx.stock_location as StockLocation]
                             : <span style={{ color: 'var(--c-text4)' }}>—</span>}
                         </td>
                       )}
                       {showExtraCols && (
-                        <td>
+                        <td className="tx-col-hide-md">
                           {isOut && refBalance !== null && refBalance.outstanding > 0
                             ? <span style={{
-                                fontSize: 13.5, fontWeight: 900,
+                                fontSize: 12, fontWeight: 800,
                                 color: '#d97706',
                               }}>
                                 {money(refBalance.outstanding)}
@@ -225,9 +235,8 @@ export function Transactions() {
                             : <span style={{ color: 'var(--c-text4)' }}>—</span>}
                         </td>
                       )}
-                      <td style={{ fontSize: 13 }}>{tx.users?.full_name ?? '—'}</td>
-                      <td style={{ fontSize: 13, color: 'var(--c-text3)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.notes ?? '—'}</td>
-                      <td style={{ fontSize: 12, color: 'var(--c-text3)', whiteSpace: 'nowrap' }}>{dt(tx.created_at)}</td>
+                      <td className="tx-col-hide-sm" style={{ fontSize: 11.5 }}>{tx.users?.full_name ?? '—'}</td>
+                      <td className="tx-col-hide-sm" style={{ fontSize: 10.5, color: 'var(--c-text3)', whiteSpace: 'nowrap' }}>{new Date(tx.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' })} {new Date(tx.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</td>
                     </tr>
                   )
                 })

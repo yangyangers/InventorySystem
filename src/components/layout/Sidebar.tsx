@@ -16,6 +16,7 @@ const MAIN = [
   { to: '/pos',          label: 'POS',          icon: ShoppingCart },
   { to: '/suppliers',    label: 'Suppliers',    icon: Truck },
   { to: '/customers',    label: 'Customers',    icon: UserCheck },
+  { to: '/collectibles',  label: 'Collectibles', icon: Wallet },
 ]
 const ADMIN = [
   { to: '/staff',         label: 'Staff',          icon: Users },
@@ -147,25 +148,6 @@ export default function Sidebar({ open, onClose }: Props) {
             )}
           </NavLink>
         ))}
-
-        {/* Collectibles — available for all businesses */}
-        <NavLink to="/collectibles" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            {({ isActive }) => (
-              <>
-                <div className="nav-icon-wrap" style={{
-                  width: 28, height: 28, borderRadius: 7, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: isActive ? 'rgba(212,160,23,0.18)' : 'rgba(255,255,255,0.04)',
-                  transition: 'background .18s, transform .18s',
-                }}>
-                  <Wallet size={14} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-                <span style={{ flex: 1 }}>Collectibles</span>
-                {isActive && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--c-gold)', boxShadow: '0 0 6px var(--c-gold)', flexShrink: 0 }} />}
-              </>
-            )}
-          </NavLink>
-
         {user.role === 'admin' && (
           <>
             <div style={{ margin: '9px 9px 2px', borderTop: '1px solid rgba(255,255,255,0.06)' }} />

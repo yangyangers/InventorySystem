@@ -36,8 +36,8 @@ function StockBar({ quantity, reorderLevel }: { quantity: number; reorderLevel: 
         <div
           style={{
             position: 'relative',
-            width: 14,
-            height: 52,
+            width: 10,
+            height: 36,
             borderRadius: 99,
             background: track,
             overflow: 'hidden',
@@ -463,17 +463,17 @@ export default function Inventory() {
       {/* Table */}
       <div className="card" style={{ overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
-          <table className="table">
+          <table className="table" style={{ fontSize: 11.5, tableLayout: "fixed", width: "100%" }}>
             <thead>
               <tr>
-                <th>Product</th><th>SKU</th><th>{user?.business_id === 'wellprint' ? 'Category / Sub-cat' : 'Category'}</th><th>Supplier</th>
-                <th style={{ textAlign: 'center' }}>Store Stock</th><th style={{ textAlign: 'center' }}>Production Stock</th><th style={{ textAlign: 'center' }}>Status</th><th>Cost</th><th>Selling Price</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th style={{ width: 170 }}>Product</th><th style={{ width: 120 }}>{user?.business_id === 'wellprint' ? 'Cat / Sub' : 'Category'}</th><th style={{ width: 100 }}>Supplier</th>
+                <th style={{ textAlign: 'center', width: 72 }}>Store</th><th style={{ textAlign: 'center', width: 72 }}>Prod.</th><th style={{ textAlign: 'center', width: 44 }}>Status</th><th style={{ width: 72 }}>Cost</th><th style={{ width: 80 }}>Price</th>
+                <th style={{ textAlign: 'right', width: 72 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading
-                ? <SkeletonRows cols={9} rows={8} />
+                ? <SkeletonRows cols={8} rows={8} />
                 : rows.length === 0
                 ? <tr><td colSpan={10}>
                     <Empty icon={<Package size={42} />} text="No products found" sub="Try adjusting your filters or add a new product." />
@@ -482,11 +482,11 @@ export default function Inventory() {
                   return (
                     <tr key={p.id}>
                       <td style={{ maxWidth: 220 }}>
-                        <p style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 14 }}>{p.name}</p>
-                        {p.description && <p style={{ fontSize: 11.5, color: 'var(--c-text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{p.description}</p>}
+                        <p style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 13.5 }}>{p.name}</p>
+                        <p style={{ fontSize: 11, color: 'var(--c-text4)', fontFamily: 'var(--mono)', marginTop: 1 }}>{p.sku}</p>
+                        
                       </td>
-                      <td><code className="mono badge badge-navy" style={{ fontSize: 11.5, borderRadius: 6, padding: '3px 8px' }}>{p.sku}</code></td>
-                      <td style={{ fontSize: 13, color: 'var(--c-text2)' }}>
+                      <td style={{ fontSize: 11, color: 'var(--c-text2)', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
                         {(() => {
                           const cat = (p as any).categories
                           if (!cat) return <span style={{ color: 'var(--c-text4)' }}>—</span>
@@ -500,16 +500,16 @@ export default function Inventory() {
                           return cat.name
                         })()}
                       </td>
-                      <td style={{ fontSize: 13, color: 'var(--c-text2)' }}>{(p as any).suppliers?.name ?? <span style={{ color: 'var(--c-text4)' }}>—</span>}</td>
+                      <td style={{ fontSize: 11, color: 'var(--c-text2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(p as any).suppliers?.name ?? <span style={{ color: 'var(--c-text4)' }}>—</span>}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 15, fontFamily: 'var(--font-head)' }}>{p.store_quantity ?? 0}</span>
-                        <span style={{ color: 'var(--c-text3)', fontSize: 12, marginLeft: 4 }}>{p.unit}</span>
+                        <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 12, fontFamily: 'var(--font-head)' }}>{p.store_quantity ?? 0}</span>
+                        <span style={{ color: 'var(--c-text3)', fontSize: 10, marginLeft: 2 }}>{p.unit}</span>
                       </td>
                       <td style={{ textAlign: 'center' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--ink)', fontSize: 15, fontFamily: 'var(--font-head)' }}>{p.production_quantity ?? 0}</span>
-                        <span style={{ color: 'var(--c-text3)', fontSize: 12, marginLeft: 4 }}>{p.unit}</span>
+                        <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 12, fontFamily: 'var(--font-head)' }}>{p.production_quantity ?? 0}</span>
+                        <span style={{ color: 'var(--c-text3)', fontSize: 10, marginLeft: 2 }}>{p.unit}</span>
                         {(p.production_quantity ?? 0) > 0 && (p.store_quantity ?? 0) === 0 && (
-                          <div style={{ fontSize: 10.5, color: 'var(--gold)', fontWeight: 700, marginTop: 2 }}>Available to transfer</div>
+                          <div style={{ fontSize: 9.5, color: 'var(--gold)', fontWeight: 700, marginTop: 1 }}>Available to transfer</div>
                         )}
                       </td>
                       <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
@@ -520,16 +520,16 @@ export default function Inventory() {
                       <td style={{ fontSize: 13, color: 'var(--c-text2)' }}>{php(p.cost_price)}</td>
                       <td style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--ink)' }}>{php(p.selling_price)}</td>
                       <td>
-                        <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                           <button className="btn-icon success" title="Record transaction" onClick={() => openTx(p)} style={{ color: 'var(--green)' }}>
-                            <ArrowLeftRight size={14} />
+                            <ArrowLeftRight size={12} />
                           </button>
                           <button className="btn-icon" title="Edit" onClick={() => openEdit(p)}>
-                            <Edit2 size={14} />
+                            <Edit2 size={12} />
                           </button>
                           {user?.role === 'admin' && (
                             <button className="btn-icon danger" title="Delete Product" onClick={() => setDeleteItem(p)}>
-                              <Trash2 size={14} />
+                              <Trash2 size={12} />
                             </button>
                           )}
                         </div>

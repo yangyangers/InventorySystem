@@ -72,7 +72,7 @@
   --mono:       'JetBrains Mono', monospace;
 
   /* Layout */
-  --sidebar-w:  252px;
+  --sidebar-w:  210px;
   --header-h:   60px;
   --radius-xs:  5px;
   --radius-sm:  8px;
@@ -556,7 +556,7 @@ textarea.input { resize: vertical; min-height: 72px; line-height: 1.6; }
   .grid-4 { grid-template-columns: 1fr; }
   .page { padding: 10px; }
   .page-title { font-size: 17px; }
-  :root { --header-h: 52px; --sidebar-w: 240px; }
+  :root { --header-h: 52px; --sidebar-w: 210px; }
 }
 
 /* ════════════════════════════════════════════════════
