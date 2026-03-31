@@ -548,8 +548,8 @@ export default function POS() {
               <span style={{ fontWeight: 900, color: 'var(--ink)', fontSize: 18 }}>{money(totalDue)}</span>
             </div>
 
-            <Field label="Amount Paid (₱)" hint="Leave blank if paying in full">
-              <input className="input" type="number" min={0} step="0.01" placeholder="0.00" value={amountPaid} onChange={e => setAmountPaid(e.target.value)} />
+            <Field label="Amount Paid (₱)" hint="Blank = full payment. Enter 0 = no payment now.">
+              <input className="input" type="number" min={0} step="0.01" placeholder="" value={amountPaid} onChange={e => setAmountPaid(e.target.value)} />
             </Field>
 
             {/* Change */}
